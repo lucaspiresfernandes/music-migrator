@@ -1,5 +1,8 @@
-from ytmusicapi import YTMusic
+from ytmusicapi import YTMusic, setup_oauth
+from ytmusicapi.auth.oauth import is_oauth
 import sys
+import os
+import json
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
@@ -45,7 +48,18 @@ print("Gathered", len(song_queries),
 
 # Youtube Delivery
 
-yt = YTMusic('.cache_yt.json')
+yt_cache_file = '.cache_yt.json'
+
+if os.path.isfile(yt_cache_file):
+    file = open(yt_cache_file, 'r')
+    cache = json.load(file)
+    if not is_oauth(cache):
+        setup_oauth(yt_cache_file, open_browser=True)
+    file.close()
+else:
+    setup_oauth(yt_cache_file, open_browser=True)
+
+yt = YTMusic(yt_cache_file)
 
 songs = []
 for i, query in enumerate(song_queries):
